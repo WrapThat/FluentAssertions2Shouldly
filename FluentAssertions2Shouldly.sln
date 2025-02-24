@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentAssertions2Shouldly",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentAssertions2Shouldly.Tests", "FluentAssertions2Shouldly.Tests\FluentAssertions2Shouldly.Tests.csproj", "{EBA83220-BBC2-438A-91A9-88BCF3C49185}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentAssertions2Shouldly.Examples", "FluentAssertions2Shouldly.Examples\FluentAssertions2Shouldly.Examples.csproj", "{63CC36C8-234A-4D89-BC06-59DF6ADA701B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{EBA83220-BBC2-438A-91A9-88BCF3C49185}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBA83220-BBC2-438A-91A9-88BCF3C49185}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBA83220-BBC2-438A-91A9-88BCF3C49185}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63CC36C8-234A-4D89-BC06-59DF6ADA701B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63CC36C8-234A-4D89-BC06-59DF6ADA701B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63CC36C8-234A-4D89-BC06-59DF6ADA701B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63CC36C8-234A-4D89-BC06-59DF6ADA701B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

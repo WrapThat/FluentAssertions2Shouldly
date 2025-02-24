@@ -1,213 +1,274 @@
 # Migration Guide
 
-## Overview
-
-This guide helps you migrate from FluentAssertions to Shouldly using our compatibility layer. The migration can be done gradually, allowing you to maintain working tests while transitioning.
+This guide helps you migrate from FluentAssertions to Shouldly using FluentAssertions2Shouldly as a bridge.
 
 ## Step-by-Step Migration
 
-### 1. Preparation
+### 1. Update Packages
+
+Remove FluentAssertions and add FluentAssertions2Shouldly:
 
 ```bash
-# Install required packages
+dotnet remove package FluentAssertions
 dotnet add package FluentAssertions2Shouldly
-dotnet add package Shouldly
 ```
+
+#### Using Central Package Management
+
+For larger solutions, it's recommended to use Central Package Management to ensure consistent package versions across all projects:
+
+1. Create or update `Directory.Packages.props` in your solution root:
+```xml
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="FluentAssertions2Shouldly" Version="1.0.0" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+  </ItemGroup>
+</Project>
+```
+
+2. Update your project files to use centrally managed versions:
+```xml
+<ItemGroup>
+  <PackageReference Include="FluentAssertions2Shouldly" />
+  <PackageReference Include="Shouldly" />
+  <PackageReference Include="xunit" />
+</ItemGroup>
+```
+
+This approach makes it easier to:
+- Maintain consistent package versions across projects
+- Update packages in one place
+- Avoid version conflicts
+- Track dependencies more effectively
 
 ### 2. Update Using Statements
 
+Replace:
 ```csharp
-// Original
 using FluentAssertions;
+```
 
-// Add our compatibility layer
+With:
+```csharp
 using FluentAssertions2Shouldly;
 ```
 
-### 3. Gradual Migration Patterns
+#### Using Global Using Statements
 
-#### Pattern 1: File-by-File Migration
+For test projects, consider using global using statements to reduce repetition and make the migration easier:
+
+1. Create a `GlobalUsings.cs` file in your test project:
 ```csharp
-// Original test file (FluentAssertions style)
-public class UserTests
-{
-    [Fact]
-    public void User_Should_Have_Valid_Name()
-    {
-        var user = new User("John");
-        user.Name.Should().NotBeNullOrEmpty();
-    }
-}
+// Core testing frameworks
+global using Xunit;
+global using FluentAssertions2Shouldly;
 
-// Migrated test file (Shouldly style)
-public class OrderTests
-{
-    [Fact]
-    public void Order_Should_Have_Valid_Total()
-    {
-        var order = new Order(100);
-        order.Total.ShouldBe(100);
-    }
-}
+// Required for async tests and Task-based assertions
+global using System.Threading.Tasks;
+
+// Required for property change notification tests
+global using System.ComponentModel;
 ```
 
-#### Pattern 2: Class-by-Class Migration
-```csharp
-// Mixed migration in same file
-public class UserTests
-{
-    // Still using FluentAssertions syntax (works through our layer)
-    [Fact]
-    public void User_Should_Have_Valid_Name()
-    {
-        var user = new User("John");
-        user.Name.Should().NotBeNullOrEmpty();
-    }
-
-    // Migrated to Shouldly syntax
-    [Fact]
-    public void User_Should_Have_Valid_Age()
-    {
-        var user = new User(25);
-        user.Age.ShouldBeGreaterThan(0);
-    }
-}
+2. Or add them to your test project file:
+```xml
+<ItemGroup>
+  <!-- Core testing frameworks -->
+  <Using Include="Xunit" />
+  <Using Include="FluentAssertions2Shouldly" />
+  
+  <!-- Required for async tests -->
+  <Using Include="System.Threading.Tasks" />
+  
+  <!-- Required for property change tests -->
+  <Using Include="System.ComponentModel" />
+</ItemGroup>
 ```
 
-### 4. Common Migration Patterns
+Note: You only need to include these namespaces if you're using the corresponding features:
+- Include `System.Threading.Tasks` if you have async tests or use task-based assertions
+- Include `System.ComponentModel` if you test property change notifications
+- Additional namespaces might be needed based on your specific test scenarios
 
-#### String Assertions
+### 3. Verify Tests Still Work
+
+Your existing tests should continue to work without modification. The library provides the same syntax as FluentAssertions while using Shouldly under the hood.
+
+### 4. Optional: Gradual Migration to Native Shouldly
+
+If you want to eventually use native Shouldly syntax, you can migrate tests gradually:
+
 ```csharp
-// FluentAssertions
+// Original FluentAssertions syntax (still works with FluentAssertions2Shouldly)
 string text = "Hello";
-text.Should().StartWith("H");
-text.Should().NotBeNullOrWhiteSpace();
+text.Should().Be("Hello");
+text.Should().StartWith("He");
 
-// Shouldly equivalent
-text.ShouldStartWith("H");
-text.ShouldNotBeNullOrWhiteSpace();
+// Native Shouldly syntax
+text.ShouldBe("Hello");
+text.ShouldStartWith("He");
 ```
 
-#### Numeric Assertions
+## Common Migration Patterns
+
+### String Assertions
+
 ```csharp
-// FluentAssertions
-int number = 42;
-number.Should().BeGreaterThan(0);
-number.Should().BeLessThan(100);
+// FluentAssertions style
+text.Should().Be("expected");
+text.Should().StartWith("ex");
+text.Should().EndWith("ed");
+text.Should().Contain("pec");
+text.Should().HaveLength(8);
 
 // Shouldly equivalent
-number.ShouldBeGreaterThan(0);
-number.ShouldBeLessThan(100);
+text.ShouldBe("expected");
+text.ShouldStartWith("ex");
+text.ShouldEndWith("ed");
+text.ShouldContain("pec");
+text.Length.ShouldBe(8);
 ```
 
-#### Collection Assertions
+### Numeric Assertions
+
 ```csharp
-// FluentAssertions
-var list = new[] { 1, 2, 3 };
+// FluentAssertions style
+number.Should().Be(42);
+number.Should().BeGreaterThan(40);
+number.Should().BeLessThan(50);
+number.Should().BeInRange(40, 45);
+
+// Shouldly equivalent
+number.ShouldBe(42);
+number.ShouldBeGreaterThan(40);
+number.ShouldBeLessThan(50);
+number.ShouldBeInRange(40, 45);
+```
+
+### Collection Assertions
+
+```csharp
+// FluentAssertions style
 list.Should().HaveCount(3);
 list.Should().Contain(2);
+list.Should().BeInAscendingOrder();
+list.Should().BeEquivalentTo(new[] { 3, 2, 1 });
 
 // Shouldly equivalent
 list.Count.ShouldBe(3);
 list.ShouldContain(2);
+list.ShouldBeInOrder();
+list.ShouldBe(new[] { 3, 2, 1 });
 ```
 
-#### Exception Assertions
+### Exception Assertions
+
 ```csharp
-// FluentAssertions
-Action action = () => throw new InvalidOperationException("error");
+// FluentAssertions style
 action.Should().Throw<InvalidOperationException>()
-      .WithMessage("error");
+    .WithMessage("error");
 
 // Shouldly equivalent
-Should.Throw<InvalidOperationException>(() => 
-    throw new InvalidOperationException("error"))
+Should.Throw<InvalidOperationException>(() => action())
     .Message.ShouldBe("error");
 ```
 
-### 5. Advanced Migration Scenarios
+### Async Assertions
 
-#### Async Tests
 ```csharp
-// FluentAssertions
-await action.Should().CompleteWithinAsync(TimeSpan.FromSeconds(1));
+// FluentAssertions style
+await task.Should().CompleteWithinAsync(TimeSpan.FromSeconds(1));
+await asyncAction.Should().ThrowAsync<InvalidOperationException>();
 
 // Shouldly equivalent
-await Should.CompleteInAsync(action, TimeSpan.FromSeconds(1));
+await Should.CompleteIn(task, TimeSpan.FromSeconds(1));
+await Should.ThrowAsync<InvalidOperationException>(asyncAction);
 ```
 
-#### Property Change Notifications
+## Advanced Migration Scenarios
+
+### Property Change Notifications
+
 ```csharp
-// FluentAssertions
+// FluentAssertions style
 person.Should().RaisePropertyChangeFor(x => x.Name);
 
 // Shouldly equivalent
-person.ShouldRaisePropertyChangeFor(x => x.Name);
+var raised = false;
+person.PropertyChanged += (s, e) => raised = e.PropertyName == nameof(person.Name);
+person.Name = "John";
+raised.ShouldBeTrue();
 ```
 
-#### Custom Assertions
+### Custom Assertions
+
 ```csharp
-// FluentAssertions
+// FluentAssertions style
 public static class CustomAssertions
 {
-    public static AndConstraint<StringAssertions> BeValidEmail(
-        this StringAssertions assertions)
+    public static void BeValidEmail(this StringAssertions assertions)
     {
         assertions.Match(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
-        return new AndConstraint<StringAssertions>(assertions);
     }
 }
 
 // Shouldly equivalent
 public static class CustomAssertions
 {
-    public static void ShouldBeValidEmail(this string actual)
+    public static void ShouldBeValidEmail(this string value)
     {
-        actual.ShouldMatch(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+        value.ShouldMatch(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
     }
 }
-```
-
-## Common Migration Challenges
-
-### 1. Chained Assertions
-```csharp
-// FluentAssertions (chained)
-text.Should()
-    .StartWith("Hello")
-    .And.EndWith("World")
-    .And.HaveLength(11);
-
-// Shouldly (separate)
-text.ShouldStartWith("Hello");
-text.ShouldEndWith("World");
-text.Length.ShouldBe(11);
-```
-
-### 2. Complex Type Assertions
-```csharp
-// FluentAssertions
-person.Should().BeOfType<Employee>()
-      .Which.Department.Should().Be("IT");
-
-// Shouldly
-person.ShouldBeOfType<Employee>();
-((Employee)person).Department.ShouldBe("IT");
-```
-
-### 3. Collection Ordering
-```csharp
-// FluentAssertions
-list.Should().BeInAscendingOrder();
-
-// Shouldly
-list.ShouldBeInOrder();
 ```
 
 ## Best Practices During Migration
 
-1. **Maintain Consistency**: Keep consistent assertion style within each test class.
-2. **Test Coverage**: Ensure test coverage doesn't decrease during migration.
-3. **Commit Strategy**: Commit migrations separately from functional changes.
-4. **Documentation**: Update team documentation and coding guidelines.
-5. **Review Process**: Have clear review guidelines for migrated tests. 
+1. **Migrate One Project at a Time**
+   - Start with smaller, less critical projects
+   - Ensure all tests pass after each step
+   - Consider using feature flags for gradual rollout
+
+2. **Update Test Patterns**
+   - Use more specific assertions when possible
+   - Take advantage of Shouldly's improved error messages
+   - Consider refactoring complex assertion chains
+
+3. **Review and Clean Up**
+   - Remove unnecessary assertion chains
+   - Simplify complex assertions
+   - Update documentation and comments
+
+4. **Monitor Performance**
+   - Watch for any performance changes
+   - Use appropriate assertion methods for collections
+   - Consider parallel test execution impact
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Ambiguous Method Calls**
+   - Ensure you're not mixing FluentAssertions and FluentAssertions2Shouldly
+   - Remove old FluentAssertions using statements
+
+2. **Missing Methods**
+   - Check the API documentation for equivalent methods
+   - Consider using alternative assertion approaches
+   - Create custom extensions if needed
+
+3. **Different Behavior**
+   - Review Shouldly's documentation for specific behavior differences
+   - Update tests to account for different null handling
+   - Adjust collection comparison logic if needed
+
+### Getting Help
+
+- Check the [GitHub issues](https://github.com/yourusername/FluentAssertions2Shouldly/issues)
+- Join the discussion in the [Shouldly community](https://github.com/shouldly/shouldly/discussions)
+- Submit bug reports with minimal reproduction code 
