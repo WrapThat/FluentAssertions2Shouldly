@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentAssertions2Shouldly", "FluentAssertions2Shouldly\FluentAssertions2Shouldly.csproj", "{1354E6C1-7206-4BFA-8D4E-8B88F36333B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentAssertions2Shouldly.Tests", "FluentAssertions2Shouldly.Tests\FluentAssertions2Shouldly.Tests.csproj", "{EBA83220-BBC2-438A-91A9-88BCF3C49185}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1354E6C1-7206-4BFA-8D4E-8B88F36333B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1354E6C1-7206-4BFA-8D4E-8B88F36333B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1354E6C1-7206-4BFA-8D4E-8B88F36333B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1354E6C1-7206-4BFA-8D4E-8B88F36333B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBA83220-BBC2-438A-91A9-88BCF3C49185}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBA83220-BBC2-438A-91A9-88BCF3C49185}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBA83220-BBC2-438A-91A9-88BCF3C49185}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBA83220-BBC2-438A-91A9-88BCF3C49185}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
