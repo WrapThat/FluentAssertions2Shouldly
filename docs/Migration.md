@@ -99,6 +99,86 @@ Note: You only need to include these namespaces if you're using the correspondin
 
 Your existing tests should continue to work without modification. The library provides the same syntax as FluentAssertions while using Shouldly under the hood.
 
+#### Running Tests
+
+1. Run your test suite:
+```bash
+dotnet test
+```
+
+2. Watch for any failures that might indicate:
+   - Missing assertion types
+   - Incompatible assertion chains
+   - Different behavior between FluentAssertions and Shouldly
+
+#### Common Issues and Solutions
+
+1. **Property Change Notifications**
+   ```csharp
+   // If this fails:
+   person.Should().RaisePropertyChangeFor(x => x.Name);
+   
+   // Try this equivalent:
+   person.MonitorPropertyChanges().RaisePropertyChangeFor("Name");
+   ```
+
+2. **Collection Ordering**
+   ```csharp
+   // If this fails:
+   list.Should().BeInAscendingOrder();
+   
+   // Verify the exact behavior you need:
+   list.Should().BeInAscendingOrder();        // Strict ascending
+   list.Should().ContainInOrder(1, 2, 3);     // Exact sequence
+   ```
+
+3. **String Comparisons**
+   ```csharp
+   // If case-sensitivity is an issue:
+   text.Should().Be("TEST");                  // Case-sensitive
+   text.Should().BeEquivalentTo("test");      // Case-insensitive
+   ```
+
+4. **Async Assertions**
+   ```csharp
+   // If timing-sensitive tests fail:
+   await task.Should().CompleteWithinAsync(TimeSpan.FromSeconds(1));
+   
+   // Consider adjusting timeouts or using more specific assertions:
+   await task;  // Wait for completion
+   await task.Should().NotThrowAsync();  // Verify no exceptions
+   ```
+
+#### Troubleshooting Steps
+
+1. **Identify Pattern**
+   - Are failures consistent across similar assertions?
+   - Do they occur only with certain types (strings, collections, etc.)?
+   - Are they related to async operations?
+
+2. **Check Documentation**
+   - Review the [API Reference](api/README.md) for correct usage
+   - Verify you're using the most appropriate assertion
+   - Look for alternative assertion patterns
+
+3. **Examine Test Context**
+   - Verify test setup is correct
+   - Check for environmental dependencies
+   - Consider timing and async issues
+
+4. **Common Solutions**
+   - Add more specific assertions
+   - Break down complex assertion chains
+   - Adjust timeouts for async operations
+   - Use appropriate comparison methods
+
+If you encounter persistent issues:
+1. Check the [GitHub issues](https://github.com/yourusername/FluentAssertions2Shouldly/issues)
+2. Consider reporting a new issue with:
+   - Minimal reproduction code
+   - Expected vs actual behavior
+   - Test environment details
+
 ### 4. Optional: Gradual Migration to Native Shouldly
 
 If you want to eventually use native Shouldly syntax, you can migrate tests gradually:
@@ -152,19 +232,127 @@ number.ShouldBeInRange(40, 45);
 
 ### Collection Assertions
 
-```csharp
-// FluentAssertions style
-list.Should().HaveCount(3);
-list.Should().Contain(2);
-list.Should().BeInAscendingOrder();
-list.Should().BeEquivalentTo(new[] { 3, 2, 1 });
+The library provides rich support for collection assertions:
 
-// Shouldly equivalent
-list.Count.ShouldBe(3);
-list.ShouldContain(2);
-list.ShouldBeInOrder();
-list.ShouldBe(new[] { 3, 2, 1 });
-```
+1. **Basic Collection Operations**
+   ```csharp
+   var list = new List<int> { 1, 2, 3, 4, 5 };
+   
+   // Count and emptiness
+   list.Should().HaveCount(5);
+   list.Should().NotBeEmpty();
+   
+   // Content checks
+   list.Should().Contain(3);
+   list.Should().NotContain(6);
+   
+   // Multiple elements
+   list.Should().ContainInOrder(1, 2, 3);
+   list.Should().BeSubsetOf(new[] { 1, 2, 3, 4, 5, 6 });
+   ```
+
+2. **Ordering and Position**
+   ```csharp
+   // Order checks
+   list.Should().BeInAscendingOrder();
+   list.Should().ContainInOrder(1, 2, 3);
+   
+   // Position checks
+   list.Should().HaveElementAt(0, 1);
+   list.Should().HaveElementAt(4, 5);
+   list.Should().StartWith(1);
+   list.Should().EndWith(5);
+   ```
+
+3. **Set Operations**
+   ```csharp
+   // Intersection
+   list.Should().IntersectWith(new[] { 3, 4, 5, 6 });
+   list.Should().NotIntersectWith(new[] { 6, 7, 8 });
+   
+   // Subset
+   list.Should().BeSubsetOf(new[] { 1, 2, 3, 4, 5, 6 });
+   
+   // Element conditions
+   list.Should().OnlyContainElementsThat(x => x > 0);
+   ```
+
+4. **Collection Types**
+   ```csharp
+   // Arrays
+   int[] array = { 1, 2, 3 };
+   array.Should().HaveCount(3);
+   array.Should().Contain(2);
+   
+   // Lists
+   var list = new List<int> { 1, 2, 3 };
+   list.Should().HaveCount(3);
+   list.Should().Contain(2);
+   
+   // IEnumerable
+   IEnumerable<int> enumerable = Enumerable.Range(1, 3);
+   enumerable.Should().HaveCount(3);
+   enumerable.Should().Contain(2);
+   ```
+
+5. **Complex Collections**
+   ```csharp
+   // Nested collections
+   var nested = new List<List<int>>
+   {
+       new List<int> { 1, 2 },
+       new List<int> { 3, 4 }
+   };
+   
+   nested.Should().HaveCount(2);
+   nested[0].Should().HaveCount(2);
+   nested[1].Should().Contain(4);
+   
+   // Dictionaries
+   var dict = new Dictionary<string, List<int>>
+   {
+       { "odds", new List<int> { 1, 3, 5 } },
+       { "evens", new List<int> { 2, 4, 6 } }
+   };
+   
+   dict.Should().ContainKey("odds");
+   dict["odds"].Should().HaveCount(3);
+   dict["evens"].Should().BeInAscendingOrder();
+   ```
+
+6. **Edge Cases**
+   ```csharp
+   // Empty collections
+   new List<int>().Should().BeEmpty();
+   Array.Empty<string>().Should().BeEmpty();
+   
+   // Single element
+   var single = new[] { 1 };
+   single.Should().HaveCount(1);
+   single.Should().ContainSingle();
+   single.Should().ContainSingle(x => x == 1);
+   
+   // Null collections
+   List<int> nullList = null;
+   nullList.Should().BeNull();
+   ```
+
+7. **Performance Considerations**
+   ```csharp
+   // Avoid multiple enumerations
+   var enumerable = Enumerable.Range(1, 1000000);
+   
+   // Good - enumerates once
+   enumerable.Should().HaveCount(1000000);
+   
+   // Bad - enumerates twice
+   enumerable.Count().Should().Be(1000000);
+   
+   // Good - stores result
+   var list = enumerable.ToList();
+   list.Should().HaveCount(1000000);
+   list.Should().Contain(500000);
+   ```
 
 ### Exception Assertions
 
@@ -190,42 +378,253 @@ await Should.CompleteIn(task, TimeSpan.FromSeconds(1));
 await Should.ThrowAsync<InvalidOperationException>(asyncAction);
 ```
 
+### Numeric Type Assertions
+
+The library provides specialized assertions for different numeric types:
+
+1. **Integer Types**
+   ```csharp
+   // Int16 (short)
+   short s = 42;
+   s.Should().BeOfType(typeof(short));
+   s.Should().BeOfType<short>();
+   s.Should().BeAssignableTo<IComparable>();
+   
+   // Int32 (int)
+   int i = 42;
+   i.Should().BeOfType(typeof(int));
+   i.Should().BeOfType<int>();
+   i.Should().BeAssignableTo<IComparable>();
+   
+   // Int64 (long)
+   long l = 42;
+   l.Should().BeOfType(typeof(long));
+   l.Should().BeOfType<long>();
+   l.Should().BeAssignableTo<IComparable>();
+   ```
+
+2. **Floating Point Types**
+   ```csharp
+   // Single (float)
+   float f = 42.0f;
+   f.Should().BeOfType(typeof(float));
+   f.Should().BeOfType<float>();
+   f.Should().BeAssignableTo<IComparable>();
+   
+   // Double
+   double d = 42.0;
+   d.Should().BeOfType(typeof(double));
+   d.Should().BeOfType<double>();
+   d.Should().BeAssignableTo<IComparable>();
+   
+   // Decimal
+   decimal m = 42.0m;
+   m.Should().BeOfType(typeof(decimal));
+   m.Should().BeOfType<decimal>();
+   m.Should().BeAssignableTo<IComparable>();
+   ```
+
+3. **Common Operations**
+   ```csharp
+   // Basic comparisons
+   number.Should().Be(42);
+   number.Should().NotBe(43);
+   
+   // Range checks
+   number.Should().BeGreaterThan(41);
+   number.Should().BeLessThan(43);
+   number.Should().BeInRange(40, 45);
+   
+   // Sign checks
+   number.Should().BePositive();
+   (-number).Should().BeNegative();
+   
+   // Set membership
+   number.Should().BeOneOf(41, 42, 43);
+   ```
+
+4. **Floating Point Considerations**
+   ```csharp
+   // Approximate equality
+   3.14159.Should().BeApproximately(3.14, 0.01);
+   
+   // Special values
+   double.PositiveInfinity.Should().Be(double.PositiveInfinity);
+   double.NegativeInfinity.Should().Be(double.NegativeInfinity);
+   double.NaN.Should().Be(double.NaN);
+   
+   // Precision-sensitive comparisons
+   0.1 + 0.2.Should().BeApproximately(0.3, 1e-10);
+   ```
+
+5. **Type Conversion Behavior**
+   ```csharp
+   // Implicit conversions are not considered
+   int i = 42;
+   i.Should().BeOfType<int>();        // Passes
+   i.Should().BeOfType<long>();       // Fails
+   i.Should().BeAssignableTo<long>(); // Passes
+   
+   // Numeric interface implementations
+   i.Should().BeAssignableTo<IComparable>();
+   i.Should().BeAssignableTo<IFormattable>();
+   i.Should().BeAssignableTo<IConvertible>();
+   ```
+
 ## Advanced Migration Scenarios
 
-### Property Change Notifications
+### Edge Cases
 
-```csharp
-// FluentAssertions style
-person.Should().RaisePropertyChangeFor(x => x.Name);
+1. **Null Values**
+   ```csharp
+   // All these assertions work as expected
+   string nullString = null;
+   nullString.Should().BeNull();
+   
+   object nullObject = null;
+   nullObject.Should().BeNull();
+   
+   List<int> nullList = null;
+   nullList.Should().BeNull();
+   ```
 
-// Shouldly equivalent
-var raised = false;
-person.PropertyChanged += (s, e) => raised = e.PropertyName == nameof(person.Name);
-person.Name = "John";
-raised.ShouldBeTrue();
-```
+2. **Empty Collections**
+   ```csharp
+   // String emptiness
+   string.Empty.Should().BeEmpty();
+   "".Should().BeEmpty();
+   
+   // Collection emptiness
+   new List<int>().Should().BeEmpty();
+   Array.Empty<string>().Should().BeEmpty();
+   new Dictionary<string, int>().Should().BeEmpty();
+   ```
 
-### Custom Assertions
+3. **Numeric Boundaries**
+   ```csharp
+   // Integer boundaries
+   int.MaxValue.Should().Be(int.MaxValue);
+   int.MinValue.Should().Be(int.MinValue);
+   
+   // Floating point boundaries
+   double.MaxValue.Should().Be(double.MaxValue);
+   double.MinValue.Should().Be(double.MinValue);
+   double.PositiveInfinity.Should().Be(double.PositiveInfinity);
+   double.NegativeInfinity.Should().Be(double.NegativeInfinity);
+   ```
 
-```csharp
-// FluentAssertions style
-public static class CustomAssertions
-{
-    public static void BeValidEmail(this StringAssertions assertions)
-    {
-        assertions.Match(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
-    }
-}
+### Complex Scenarios
 
-// Shouldly equivalent
-public static class CustomAssertions
-{
-    public static void ShouldBeValidEmail(this string value)
-    {
-        value.ShouldMatch(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
-    }
-}
-```
+1. **Nested Collections**
+   ```csharp
+   var nested = new List<List<int>>
+   {
+       new List<int> { 1, 2 },
+       new List<int> { 3, 4 }
+   };
+   
+   nested.Should().HaveCount(2);
+   nested.Should().NotBeEmpty();
+   nested[0].Should().HaveCount(2);
+   nested[1].Should().Contain(4);
+   ```
+
+2. **Complex Object Graphs**
+   ```csharp
+   var complex = new Dictionary<string, List<int>>
+   {
+       { "odds", new List<int> { 1, 3, 5 } },
+       { "evens", new List<int> { 2, 4, 6 } }
+   };
+   
+   complex.Should().ContainKey("odds");
+   complex["odds"].Should().HaveCount(3);
+   complex["odds"].Should().Contain(3);
+   complex["evens"].Should().BeInAscendingOrder();
+   ```
+
+3. **Circular References**
+   ```csharp
+   public class Node
+   {
+       public int Value { get; set; }
+       public Node Next { get; set; }
+   }
+   
+   var node1 = new Node { Value = 1 };
+   var node2 = new Node { Value = 2 };
+   node1.Next = node2;
+   node2.Next = node1;
+   
+   node1.Should().NotBeNull();
+   node1.Value.Should().Be(1);
+   node1.Next.Should().NotBeNull();
+   node1.Next.Value.Should().Be(2);
+   ```
+
+### Specialized Assertions
+
+1. **File Operations**
+   ```csharp
+   var file = new FileInfo("test.txt");
+   File.WriteAllText(file.FullName, "test");
+   
+   try
+   {
+       file.Should().Exist();
+       file.Should().HaveExtension(".txt");
+       file.Should().HaveLength(4); // "test" is 4 bytes
+   }
+   finally
+   {
+       if (File.Exists(file.FullName))
+       {
+           File.Delete(file.FullName);
+       }
+   }
+   ```
+
+2. **Async Operations**
+   ```csharp
+   // Basic async completion
+   var task = Task.Delay(100);
+   await task.Should().CompleteWithinAsync(TimeSpan.FromSeconds(1));
+   
+   // Async exceptions
+   Func<Task> failing = () => Task.FromException(new InvalidOperationException());
+   await failing.Should().ThrowAsync<InvalidOperationException>();
+   
+   // Cancellation
+   using var cts = new CancellationTokenSource();
+   Func<Task> cancelling = async () => {
+       await Task.Delay(1000, cts.Token);
+   };
+   cts.Cancel();
+   await cancelling.Should().ThrowAsync<TaskCanceledException>();
+   ```
+
+3. **Property Change Notifications**
+   ```csharp
+   public class Person : INotifyPropertyChanged
+   {
+       private string _name;
+       public event PropertyChangedEventHandler PropertyChanged;
+       
+       public string Name
+       {
+           get => _name;
+           set
+           {
+               _name = value;
+               PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+           }
+       }
+   }
+   
+   var person = new Person();
+   person.MonitorPropertyChanges().RaisePropertyChangeFor("Name");
+   person.Name = "John";
+   ```
 
 ## Best Practices During Migration
 

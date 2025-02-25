@@ -1,4 +1,3 @@
-using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -41,7 +40,7 @@ namespace FluentAssertions2Shouldly.Tests
             // Object assertions
             var obj = new { Name = "Test", Age = 30 };
             obj.Should().NotBeNull();
-            obj.Should().BeOfType<{ Name: string, Age: int }>();
+            obj.Should().BeOfType(obj.GetType());
             
             // Exception assertions
             Action action = () => throw new InvalidOperationException("test");

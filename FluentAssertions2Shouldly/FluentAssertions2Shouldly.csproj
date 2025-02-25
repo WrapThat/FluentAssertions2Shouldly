@@ -4,9 +4,27 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    
+    <!-- NuGet package properties -->
+    <Version>1.0.0-beta.1</Version>
+    <Authors>Your Name</Authors>
+    <Company>Your Company</Company>
+    <Description>A library that provides FluentAssertions-style syntax while using Shouldly under the hood, perfect for projects migrating from FluentAssertions to Shouldly.</Description>
+    <PackageProjectUrl>https://github.com/yourusername/FluentAssertions2Shouldly</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/yourusername/FluentAssertions2Shouldly.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>testing;assertions;fluent;shouldly;fluentassertions</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
   </ItemGroup>
 
