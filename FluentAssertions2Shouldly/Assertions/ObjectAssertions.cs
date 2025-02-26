@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -20,17 +21,36 @@ namespace FluentAssertions2Shouldly
         // Collection assertions for IReadOnlyList and IEnumerable
         public ObjectAssertions<T> HaveCount(int expected)
         {
-            if (Subject is IEnumerable<object> enumerable)
+            if (Subject is IEnumerable enumerable)
             {
-                enumerable.Count().ShouldBe(expected);
+                var count = enumerable.Cast<object>().Count();
+                count.ShouldBe(expected);
                 return this;
             }
-            if (Subject is System.Collections.IEnumerable nonGenericEnumerable)
+
+            throw new ShouldAssertException($"Expected {typeof(T).Name} to implement IEnumerable");
+        }
+
+        public ObjectAssertions<T> NotBeEmpty()
+        {
+            if (Subject is IEnumerable enumerable)
             {
-                nonGenericEnumerable.Cast<object>().Count().ShouldBe(expected);
+                enumerable.Cast<object>().ShouldNotBeEmpty();
                 return this;
             }
-            throw new ShouldAssertException($"Cannot verify count on type {typeof(T).Name} as it does not implement IEnumerable");
+
+            throw new ShouldAssertException($"Expected {typeof(T).Name} to implement IEnumerable");
+        }
+
+        public ObjectAssertions<T> BeEmpty()
+        {
+            if (Subject is IEnumerable enumerable)
+            {
+                enumerable.Cast<object>().ShouldBeEmpty();
+                return this;
+            }
+
+            throw new ShouldAssertException($"Expected {typeof(T).Name} to implement IEnumerable");
         }
 
         public ObjectAssertions<T> ContainSingle()
@@ -40,7 +60,7 @@ namespace FluentAssertions2Shouldly
                 enumerable.Count().ShouldBe(1);
                 return this;
             }
-            if (Subject is System.Collections.IEnumerable nonGenericEnumerable)
+            if (Subject is IEnumerable nonGenericEnumerable)
             {
                 nonGenericEnumerable.Cast<object>().Count().ShouldBe(1);
                 return this;
@@ -55,12 +75,32 @@ namespace FluentAssertions2Shouldly
                 enumerable.Count(predicate).ShouldBe(1);
                 return this;
             }
-            if (Subject is System.Collections.IEnumerable nonGenericEnumerable)
+            if (Subject is IEnumerable nonGenericEnumerable)
             {
                 nonGenericEnumerable.Cast<object>().Count(predicate).ShouldBe(1);
                 return this;
             }
             throw new ShouldAssertException($"Cannot verify single item with predicate on type {typeof(T).Name} as it does not implement IEnumerable");
+        }
+
+        public ObjectAssertions<T> ContainSingle<TItem>(Func<TItem, bool> predicate)
+        {
+            if (Subject is IEnumerable<TItem> enumerable)
+            {
+                enumerable.Count(predicate).ShouldBe(1);
+                return this;
+            }
+            throw new ShouldAssertException($"Cannot verify single item with predicate on type {typeof(T).Name} as it does not implement IEnumerable<{typeof(TItem).Name}>");
+        }
+
+        public ObjectAssertions<T> NotContainSingle<TItem>(Func<TItem, bool> predicate)
+        {
+            if (Subject is IEnumerable<TItem> enumerable)
+            {
+                enumerable.Count(predicate).ShouldNotBe(1);
+                return this;
+            }
+            throw new ShouldAssertException($"Cannot verify not single item with predicate on type {typeof(T).Name} as it does not implement IEnumerable<{typeof(TItem).Name}>");
         }
 
         public ObjectAssertions<T> AllSatisfy(Action<object> action)

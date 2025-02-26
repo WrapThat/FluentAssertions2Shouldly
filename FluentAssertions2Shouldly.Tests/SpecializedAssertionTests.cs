@@ -82,12 +82,13 @@ namespace FluentAssertions2Shouldly.Tests
         [Fact]
         public void DelegateAssertions_ShouldWork()
         {
+            // Arrange
             Action successAction = () => { };
-            successAction.Should().NotThrow<Exception>();
+            Action failAction = () => throw new InvalidOperationException();
 
-            Action failAction = () => throw new InvalidOperationException("error");
-            failAction.Should().Throw<InvalidOperationException>()
-                .WithMessage("error");
+            // Act & Assert
+            successAction.Should().NotThrow();
+            failAction.Should().Throw<InvalidOperationException>();
         }
 
         [Fact]

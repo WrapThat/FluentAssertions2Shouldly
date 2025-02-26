@@ -45,6 +45,11 @@ public static class CollectionExtensions
     {
         return new CollectionAssertions<T>(value);
     }
+
+    public static ObjectAssertions<IReadOnlyList<T>> Should<T>(this IReadOnlyList<T> value)
+    {
+        return new ObjectAssertions<IReadOnlyList<T>>(value);
+    }
 }
 
 public static class ExceptionExtensions
@@ -60,6 +65,16 @@ public static class ActionExtensions
     public static ActionAssertions Should(this Action value)
     {
         return new ActionAssertions(value);
+    }
+
+    public static ActionAssertions ThrowExactly<T>(this Action action) where T : Exception
+    {
+        return new ActionAssertions(action).ThrowExactly<T>();
+    }
+
+    public static ActionAssertions NotThrow(this Action action)
+    {
+        return new ActionAssertions(action).NotThrow();
     }
 }
 
