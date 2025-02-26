@@ -1,6 +1,9 @@
 # FluentAssertions2Shouldly
 
+> This library was developed using [Cursor](https://cursor.sh/), an AI-powered code editor.
+
 A library that provides a FluentAssertions-style syntax while using Shouldly under the hood. This is perfect for:
+
 - Projects migrating from FluentAssertions to Shouldly
 - Teams who prefer FluentAssertions' syntax but want to use Shouldly's features
 - Maintaining consistent test style across mixed codebases
