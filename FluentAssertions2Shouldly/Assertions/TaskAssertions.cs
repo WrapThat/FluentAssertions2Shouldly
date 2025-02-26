@@ -1,4 +1,3 @@
-#pragma warning disable CS1591 // Missing XML documentation
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,15 +20,15 @@ namespace FluentAssertions2Shouldly
         {
             using var cts = new CancellationTokenSource();
             var timeoutTask = Task.Delay(timeout, cts.Token);
-            
             var completedTask = await Task.WhenAny(_subject, timeoutTask);
+            
             if (completedTask == timeoutTask)
             {
                 throw new ShouldCompleteInException(
                     $"Task should complete within {timeout.TotalSeconds} seconds",
                     new ShouldlyTimeoutException($"Task did not complete within {timeout.TotalSeconds} seconds", null));
             }
-
+            
             cts.Cancel(); // Cancel the timeout task
             await _subject; // Propagate any exceptions from the original task
         }
@@ -106,4 +105,3 @@ namespace FluentAssertions2Shouldly
         }
     }
 } 
-#pragma warning restore CS1591 

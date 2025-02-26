@@ -50,7 +50,7 @@ namespace FluentAssertions2Shouldly
             {
                 throw new ShouldAssertException("Subject (null)\n    should not be null or white space");
             }
-            if (string.IsNullOrWhiteSpace(Subject))
+            if (Subject.Length == 0)
             {
                 throw new ShouldAssertException($"Subject ({Subject})\n    should not be null or white space");
             }

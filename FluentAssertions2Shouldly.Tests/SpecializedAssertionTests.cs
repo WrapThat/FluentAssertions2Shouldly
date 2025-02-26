@@ -6,6 +6,7 @@ using Xunit;
 using FluentAssertions2Shouldly;
 using System.Collections.Generic;
 using System.Threading;
+using Shouldly;
 
 namespace FluentAssertions2Shouldly.Tests
 {
@@ -195,7 +196,7 @@ namespace FluentAssertions2Shouldly.Tests
 
             // Long running task timeout
             var longTask = Task.Delay(5000);
-            await longTask.Should().CompleteWithinAsync(TimeSpan.FromMilliseconds(100));
+            await Assert.ThrowsAsync<ShouldCompleteInException>(() => longTask.Should().CompleteWithinAsync(TimeSpan.FromMilliseconds(100)));
         }
     }
 

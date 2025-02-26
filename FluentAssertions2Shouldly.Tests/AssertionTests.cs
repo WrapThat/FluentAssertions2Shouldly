@@ -27,7 +27,7 @@ namespace FluentAssertions2Shouldly.Tests
             // Empty/null assertions
             string.Empty.Should().BeEmpty();
             "".Should().BeEmpty();
-            string.Empty.Should().NotBeNullOrWhiteSpace();
+            "test".Should().NotBeNullOrWhiteSpace();
             " ".Should().NotBeEmpty();
             ((string)null).Should().BeNull();
             "test".Should().NotBeNull();
