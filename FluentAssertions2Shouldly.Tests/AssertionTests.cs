@@ -87,7 +87,7 @@ namespace FluentAssertions2Shouldly.Tests
             list.Should().ContainInOrder(1, 2, 3);
             
             // Content assertions
-            list.Should().OnlyContain(x => x > 0);
+            list.Should().OnlyContainElementsThat(x => x > 0);
             list.Should().BeEquivalentTo(new[] { 3, 2, 1 });
             list.Should().BeSubsetOf(new[] { 1, 2, 3, 4 });
             
@@ -232,6 +232,54 @@ namespace FluentAssertions2Shouldly.Tests
             var monitor = person.MonitorPropertyChanges();
             person.Name = "John";
             monitor.RaisePropertyChangeFor("Name");
+        }
+
+        [Flags]
+        private enum TestFlags
+        {
+            None = 0,
+            One = 1,
+            Two = 2,
+            Four = 4,
+            All = One | Two | Four
+        }
+
+        [Fact]
+        public void EnumAssertions_AllMethods()
+        {
+            // Basic assertions
+            TestFlags value = TestFlags.One;
+            value.Should().Be(TestFlags.One);
+            value.Should().NotBe(TestFlags.Two);
+            value.Should().BeDefinedEnum();
+            value.Should().HaveValue(1);
+            value.Should().NotHaveValue(2);
+
+            // Flag assertions
+            value.Should().HaveFlag(TestFlags.One);
+            value.Should().NotHaveFlag(TestFlags.Two);
+
+            // Multiple flags
+            TestFlags combined = TestFlags.One | TestFlags.Two;
+            combined.Should().HaveFlags(TestFlags.One, TestFlags.Two);
+            combined.Should().NotHaveFlag(TestFlags.Four);
+            combined.Should().HaveValue(3);
+            combined.Should().HaveExactFlags(TestFlags.One, TestFlags.Two);
+
+            // Set membership
+            value.Should().BeOneOf(TestFlags.None, TestFlags.One, TestFlags.Two);
+
+            // Chaining assertions
+            value.Should()
+                .Be(TestFlags.One);
+
+            value.Should().HaveFlags(TestFlags.One);
+            value.Should().NotHaveFlags(TestFlags.Two);
+            value.Should().BeDefinedEnum();
+
+            // Invalid value
+            TestFlags invalid = (TestFlags)99;
+            invalid.Should().NotBeDefinedEnum();
         }
 
         private class TestPerson : INotifyPropertyChanged

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace FluentAssertions2Shouldly.Tests
@@ -65,7 +66,10 @@ namespace FluentAssertions2Shouldly.Tests
             typeof(string).Should().Implement<IEnumerable<char>>();
             
             // File assertions
-            "path/to/file.txt".Should().Exist();  // For file paths
+            var testFilePath = "test_file.txt";
+            File.WriteAllText(testFilePath, "test content");
+            testFilePath.Should().Exist();  // For file paths
+            File.Delete(testFilePath);
             
             // Execution time assertions
             action = () => System.Threading.Thread.Sleep(100);

@@ -123,9 +123,10 @@ public static class DateTimeExtensions
 
 public static class DictionaryExtensions
 {
-    public static DictionaryAssertions<TKey, TValue> Should<TKey, TValue>(this IDictionary<TKey, TValue> value)
+    public static DictionaryAssertions<TKey, TValue> Should<TKey, TValue>(this IDictionary<TKey, TValue> actual) 
+        where TKey : notnull
     {
-        return new DictionaryAssertions<TKey, TValue>(value);
+        return new DictionaryAssertions<TKey, TValue>(actual);
     }
 
     public static DictionaryAssertions<TKey, TValue> Should<TKey, TValue>(this Dictionary<TKey, TValue> value)
@@ -184,11 +185,12 @@ public static class EnumExtensions
 
 public class AndConstraint<T> where T : class
 {
-    public T And { get; }
+    private readonly T _value;
+    public T And => _value;
 
     public AndConstraint(T value)
     {
-        And = value;
+        _value = value;
     }
 }
 

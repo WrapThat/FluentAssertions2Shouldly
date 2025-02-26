@@ -53,15 +53,29 @@ namespace FluentAssertions2Shouldly.Tests
             double.MaxValue.Should().Be(double.MaxValue);
             double.MinValue.Should().Be(double.MinValue);
             double.Epsilon.Should().BeGreaterThan(0);
-            double.PositiveInfinity.Should().Be(double.PositiveInfinity);
-            double.NegativeInfinity.Should().Be(double.NegativeInfinity);
+            double.PositiveInfinity.Should().BePositiveInfinity();
+            double.NegativeInfinity.Should().BeNegativeInfinity();
+            double.NaN.Should().BeNaN();
             
             // Float boundaries
             float.MaxValue.Should().Be(float.MaxValue);
             float.MinValue.Should().Be(float.MinValue);
             float.Epsilon.Should().BeGreaterThan(0);
-            float.PositiveInfinity.Should().Be(float.PositiveInfinity);
-            float.NegativeInfinity.Should().Be(float.NegativeInfinity);
+            float.PositiveInfinity.Should().BePositiveInfinity();
+            float.NegativeInfinity.Should().BeNegativeInfinity();
+            float.NaN.Should().BeNaN();
+
+            // Zero values
+            0.Should().BeZero();
+            0.0.Should().BeZero();
+            0f.Should().BeZero();
+            0m.Should().BeZero();
+
+            // Finite values
+            42.Should().BeFinite();
+            3.14159.Should().BeFinite();
+            1.23f.Should().BeFinite();
+            123.456m.Should().BeFinite();
         }
 
         [Fact]
@@ -116,10 +130,54 @@ namespace FluentAssertions2Shouldly.Tests
                         .Should().ThrowAsync<Exception>();
         }
 
+        [Fact]
+        public void EnumFlags_ShouldWork()
+        {
+            // Single flag
+            TestFlags.One.Should()
+                .Be(TestFlags.One)
+                .And.HaveFlag(TestFlags.One)
+                .And.NotHaveFlag(TestFlags.Two)
+                .And.BeDefinedEnum();
+
+            // Combined flags
+            var combined = TestFlags.One | TestFlags.Two;
+            combined.Should()
+                .HaveFlags(TestFlags.One, TestFlags.Two)
+                .And.NotHaveFlag(TestFlags.Four)
+                .And.HaveValue((int)(TestFlags.One | TestFlags.Two));
+
+            // Any flag
+            combined.Should()
+                .HaveAnyFlag(TestFlags.One, TestFlags.Four)
+                .And.NotHaveAnyFlag(TestFlags.All);
+
+            // No flags
+            TestFlags.None.Should()
+                .Be(TestFlags.None)
+                .And.NotHaveAnyFlag(TestFlags.One, TestFlags.Two, TestFlags.Four);
+
+            // All flags
+            TestFlags.All.Should()
+                .Be(TestFlags.All)
+                .And.HaveFlags(TestFlags.One, TestFlags.Two, TestFlags.Four)
+                .And.HaveExactFlags(TestFlags.One, TestFlags.Two, TestFlags.Four);
+        }
+
         private class Node
         {
             public int Value { get; set; }
             public Node Next { get; set; }
+        }
+
+        [Flags]
+        private enum TestFlags
+        {
+            None = 0,
+            One = 1,
+            Two = 2,
+            Four = 4,
+            All = One | Two | Four
         }
     }
 } 

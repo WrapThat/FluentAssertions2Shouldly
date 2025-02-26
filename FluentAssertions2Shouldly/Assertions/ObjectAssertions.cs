@@ -12,6 +12,8 @@ namespace FluentAssertions2Shouldly
             Subject = value;
         }
 
+        public AndConstraint<ObjectAssertions<T>> And => new AndConstraint<ObjectAssertions<T>>(this);
+
         public ObjectAssertions<T> BeNull()
         {
             Subject.ShouldBeNull();
@@ -27,6 +29,18 @@ namespace FluentAssertions2Shouldly
         public ObjectAssertions<T> Be(T expected)
         {
             Subject.ShouldBe(expected);
+            return this;
+        }
+
+        public ObjectAssertions<T> BeSameAs(T expected)
+        {
+            ReferenceEquals(Subject, expected).ShouldBeTrue();
+            return this;
+        }
+
+        public ObjectAssertions<T> NotBeSameAs(T expected)
+        {
+            ReferenceEquals(Subject, expected).ShouldBeFalse();
             return this;
         }
 
@@ -48,14 +62,6 @@ namespace FluentAssertions2Shouldly
             return this;
         }
 
-        public ObjectAssertions<T> Match<TValue>(Func<TValue, bool> predicate) where TValue : class
-        {
-            var value = Subject as TValue;
-            value.ShouldNotBeNull();
-            predicate(value).ShouldBeTrue();
-            return this;
-        }
-
         public ObjectAssertions<T> BeAssignableTo(Type expected)
         {
             Subject.ShouldBeAssignableTo(expected);
@@ -73,6 +79,26 @@ namespace FluentAssertions2Shouldly
         {
             Subject.GetType().IsAssignableTo(expected)
                 .ShouldBeFalse();
+            return this;
+        }
+
+        public ObjectAssertions<T> BeEquivalentTo(T expected)
+        {
+            Subject.ShouldBe(expected);
+            return this;
+        }
+
+        public ObjectAssertions<T> NotBeEquivalentTo(T unexpected)
+        {
+            Subject.ShouldNotBe(unexpected);
+            return this;
+        }
+
+        public ObjectAssertions<T> Match<TValue>(Func<TValue, bool> predicate) where TValue : class
+        {
+            var value = Subject as TValue;
+            value.ShouldNotBeNull();
+            predicate(value).ShouldBeTrue();
             return this;
         }
     }

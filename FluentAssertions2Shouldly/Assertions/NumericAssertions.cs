@@ -14,6 +14,8 @@ namespace FluentAssertions2Shouldly
             Subject = subject;
         }
 
+        public AndConstraint<NumericAssertions<T>> And => new AndConstraint<NumericAssertions<T>>(this);
+
         public NumericAssertions<T> Be(T expected)
         {
             ((object)Subject).ShouldBe(expected);
@@ -32,9 +34,21 @@ namespace FluentAssertions2Shouldly
             return this;
         }
 
+        public NumericAssertions<T> BeGreaterThanOrEqualTo(T expected)
+        {
+            Subject.CompareTo(expected).ShouldBeGreaterThanOrEqualTo(0);
+            return this;
+        }
+
         public NumericAssertions<T> BeLessThan(T expected)
         {
             Subject.CompareTo(expected).ShouldBeLessThan(0);
+            return this;
+        }
+
+        public NumericAssertions<T> BeLessThanOrEqualTo(T expected)
+        {
+            Subject.CompareTo(expected).ShouldBeLessThanOrEqualTo(0);
             return this;
         }
 
@@ -63,11 +77,34 @@ namespace FluentAssertions2Shouldly
             return this;
         }
 
+        public NumericAssertions<T> NotBeOneOf(params T[] unexpected)
+        {
+            unexpected.ShouldNotContain(Subject);
+            return this;
+        }
+
         public NumericAssertions<T> BeApproximately(T expected, T precision)
         {
             var difference = Convert.ToDouble(Subject) - Convert.ToDouble(expected);
             Math.Abs(difference).ShouldBeLessThanOrEqualTo(Convert.ToDouble(precision));
             return this;
+        }
+
+        public NumericAssertions<T> NotBeApproximately(T expected, T precision)
+        {
+            var difference = Convert.ToDouble(Subject) - Convert.ToDouble(expected);
+            Math.Abs(difference).ShouldBeGreaterThan(Convert.ToDouble(precision));
+            return this;
+        }
+
+        public NumericAssertions<T> BeCloseTo(T expected, T precision)
+        {
+            return BeApproximately(expected, precision);
+        }
+
+        public NumericAssertions<T> NotBeCloseTo(T expected, T precision)
+        {
+            return NotBeApproximately(expected, precision);
         }
 
         public NumericAssertions<T> BeOfType(Type expected)
@@ -86,6 +123,60 @@ namespace FluentAssertions2Shouldly
         {
             throw new ShouldAssertException($"Cannot verify if {typeof(T).Name} is null because value types cannot be null");
         }
+
+        public NumericAssertions<T> BeZero()
+        {
+            Subject.CompareTo(default(T)).ShouldBe(0);
+            return this;
+        }
+
+        public NumericAssertions<T> NotBeZero()
+        {
+            Subject.CompareTo(default(T)).ShouldNotBe(0);
+            return this;
+        }
+
+        public NumericAssertions<T> BeFinite()
+        {
+            var value = Convert.ToDouble(Subject);
+            (!double.IsInfinity(value) && !double.IsNaN(value)).ShouldBeTrue();
+            return this;
+        }
+
+        public NumericAssertions<T> BeInfinity()
+        {
+            var value = Convert.ToDouble(Subject);
+            double.IsInfinity(value).ShouldBeTrue();
+            return this;
+        }
+
+        public NumericAssertions<T> BePositiveInfinity()
+        {
+            var value = Convert.ToDouble(Subject);
+            double.IsPositiveInfinity(value).ShouldBeTrue();
+            return this;
+        }
+
+        public NumericAssertions<T> BeNegativeInfinity()
+        {
+            var value = Convert.ToDouble(Subject);
+            double.IsNegativeInfinity(value).ShouldBeTrue();
+            return this;
+        }
+
+        public NumericAssertions<T> BeNaN()
+        {
+            var value = Convert.ToDouble(Subject);
+            double.IsNaN(value).ShouldBeTrue();
+            return this;
+        }
+
+        public NumericAssertions<T> NotBeNaN()
+        {
+            var value = Convert.ToDouble(Subject);
+            double.IsNaN(value).ShouldBeFalse();
+            return this;
+        }
     }
 
     public class NullableNumericAssertions<T> where T : struct, IComparable<T>
@@ -96,6 +187,8 @@ namespace FluentAssertions2Shouldly
         {
             Subject = subject;
         }
+
+        public AndConstraint<NullableNumericAssertions<T>> And => new AndConstraint<NullableNumericAssertions<T>>(this);
 
         public NullableNumericAssertions<T> BeNull()
         {

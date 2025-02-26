@@ -11,6 +11,8 @@ namespace FluentAssertions2Shouldly
         {
         }
 
+        public new CollectionAssertions<T> And => this;
+
         public CollectionAssertions<T> BeEmpty()
         {
             Subject.ShouldBeEmpty();
@@ -46,18 +48,36 @@ namespace FluentAssertions2Shouldly
         public CollectionAssertions<T> BeInDescendingOrder()
         {
             var list = Subject.ToList();
-            var sorted = list.OrderByDescending(x => x).ToList();
-            list.SequenceEqual(sorted).ShouldBeTrue();
+            for (int i = 0; i < list.Count - 1; i++)
+            {
+                Comparer<T>.Default.Compare(list[i], list[i + 1]).ShouldBeGreaterThanOrEqualTo(0);
+            }
             return this;
         }
 
         public CollectionAssertions<T> ContainInOrder(params T[] expected)
         {
             var list = Subject.ToList();
-            list.Count.ShouldBeGreaterThanOrEqualTo(expected.Length);
-            for (int i = 0; i < expected.Length; i++)
+            var expectedList = expected.ToList();
+            
+            int currentIndex = 0;
+            foreach (var item in expectedList)
             {
-                list[i].ShouldBe(expected[i]);
+                var index = list.IndexOf(item, currentIndex);
+                index.ShouldBeGreaterThanOrEqualTo(currentIndex);
+                currentIndex = index + 1;
+            }
+            return this;
+        }
+
+        public CollectionAssertions<T> ContainInConsecutiveOrder(params T[] expected)
+        {
+            var list = Subject.ToList();
+            var expectedList = expected.ToList();
+            
+            for (int i = 0; i < expectedList.Count; i++)
+            {
+                list.Skip(i).Take(1).ShouldContain(expectedList[i]);
             }
             return this;
         }
@@ -73,15 +93,29 @@ namespace FluentAssertions2Shouldly
             return this;
         }
 
-        public CollectionAssertions<T> BeEquivalentTo(IEnumerable<T> expected)
+        public new CollectionAssertions<T> BeEquivalentTo(IEnumerable<T> expected)
         {
-            var list = Subject.ToList();
-            var expectedList = expected.ToList();
-            list.Count.ShouldBe(expectedList.Count);
+            var subjectList = Subject.ToList();
+            var expectedList = (expected ?? Array.Empty<T>()).ToList();
+
+            subjectList.Count.ShouldBe(expectedList.Count, "Expected collections to have the same number of elements");
+            
             foreach (var item in expectedList)
             {
-                list.ShouldContain(item);
+                subjectList.ShouldContain(item);
             }
+
+            foreach (var item in subjectList)
+            {
+                expectedList.ShouldContain(item);
+            }
+
+            return this;
+        }
+
+        public new CollectionAssertions<T> NotBeEquivalentTo(IEnumerable<T> unexpected)
+        {
+            Subject.ShouldNotBe(unexpected ?? Array.Empty<T>());
             return this;
         }
 
@@ -114,6 +148,27 @@ namespace FluentAssertions2Shouldly
             foreach (var item in Subject)
             {
                 predicate(item).ShouldBeTrue();
+            }
+            return this;
+        }
+
+        public CollectionAssertions<T> AllSatisfy(Action<T> action)
+        {
+            foreach (var item in Subject)
+            {
+                action(item);
+            }
+            return this;
+        }
+
+        public CollectionAssertions<T> SatisfyRespectively(params Action<T>[] actions)
+        {
+            var list = Subject.ToList();
+            list.Count.ShouldBe(actions.Length);
+            
+            for (int i = 0; i < actions.Length; i++)
+            {
+                actions[i](list[i]);
             }
             return this;
         }
@@ -155,44 +210,13 @@ namespace FluentAssertions2Shouldly
 
         public CollectionAssertions<T> BeSubsetOf(IEnumerable<T> superset)
         {
+            var list = Subject.ToList();
             var supersetList = superset.ToList();
-            foreach (var item in Subject)
+            
+            foreach (var item in list)
             {
                 supersetList.ShouldContain(item);
             }
-            return this;
-        }
-
-        public CollectionAssertions<T> OnlyContain(Func<T, bool> predicate)
-        {
-            Subject.All(predicate).ShouldBeTrue();
-            return this;
-        }
-
-        public CollectionAssertions<T> BeEquivalentTo(IEnumerable<T> expected, 
-            Func<T, T, bool> compareFunc = null)
-        {
-            var subjectList = Subject.ToList();
-            var expectedList = expected.ToList();
-
-            subjectList.Count.ShouldBe(expectedList.Count);
-
-            if (compareFunc != null)
-            {
-                foreach (var expectedItem in expectedList)
-                {
-                    subjectList.Any(item => compareFunc(item, expectedItem))
-                        .ShouldBeTrue();
-                }
-            }
-            else
-            {
-                foreach (var expectedItem in expectedList)
-                {
-                    subjectList.ShouldContain(expectedItem);
-                }
-            }
-
             return this;
         }
 

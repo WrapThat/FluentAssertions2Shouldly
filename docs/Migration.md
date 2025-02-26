@@ -562,69 +562,195 @@ The library provides specialized assertions for different numeric types:
    node1.Next.Value.Should().Be(2);
    ```
 
-### Specialized Assertions
+4. **Nested Property Changes**
+```csharp
+public class Address
+{
+    public string Street { get; set; }
+    public string City { get; set; }
+}
 
-1. **File Operations**
-   ```csharp
-   var file = new FileInfo("test.txt");
-   File.WriteAllText(file.FullName, "test");
-   
-   try
-   {
-       file.Should().Exist();
-       file.Should().HaveExtension(".txt");
-       file.Should().HaveLength(4); // "test" is 4 bytes
-   }
-   finally
-   {
-       if (File.Exists(file.FullName))
-       {
-           File.Delete(file.FullName);
-       }
-   }
-   ```
+public class Person : INotifyPropertyChanged
+{
+    private Address _address;
+    public event PropertyChangedEventHandler PropertyChanged;
 
-2. **Async Operations**
-   ```csharp
-   // Basic async completion
-   var task = Task.Delay(100);
-   await task.Should().CompleteWithinAsync(TimeSpan.FromSeconds(1));
-   
-   // Async exceptions
-   Func<Task> failing = () => Task.FromException(new InvalidOperationException());
-   await failing.Should().ThrowAsync<InvalidOperationException>();
-   
-   // Cancellation
-   using var cts = new CancellationTokenSource();
-   Func<Task> cancelling = async () => {
-       await Task.Delay(1000, cts.Token);
-   };
-   cts.Cancel();
-   await cancelling.Should().ThrowAsync<TaskCanceledException>();
-   ```
+    public Address Address
+    {
+        get => _address;
+        set
+        {
+            _address = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Address)));
+        }
+    }
+}
 
-3. **Property Change Notifications**
-   ```csharp
-   public class Person : INotifyPropertyChanged
-   {
-       private string _name;
-       public event PropertyChangedEventHandler PropertyChanged;
-       
-       public string Name
-       {
-           get => _name;
-           set
-           {
-               _name = value;
-               PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-           }
-       }
-   }
-   
-   var person = new Person();
-   person.MonitorPropertyChanges().RaisePropertyChangeFor("Name");
-   person.Name = "John";
-   ```
+// Monitoring nested property changes
+var person = new Person();
+var monitor = person.MonitorPropertyChanges();
+
+person.Address = new Address { Street = "123 Main St" };
+monitor.RaisePropertyChangeFor("Address");
+```
+
+5. **Complex Task Chains**
+```csharp
+// Sequential tasks
+var task1 = Task.Delay(100);
+var task2 = task1.ContinueWith(_ => 42);
+var task3 = task2.ContinueWith(t => t.Result * 2);
+
+await task1.Should().CompleteWithinAsync(TimeSpan.FromSeconds(1));
+await task2;
+task2.Result.Should().Be(42);
+await task3;
+task3.Result.Should().Be(84);
+
+// Parallel tasks
+var tasks = new[]
+{
+    Task.Delay(100),
+    Task.Delay(200),
+    Task.Delay(300)
+};
+
+await Task.WhenAll(tasks).Should()
+    .CompleteWithinAsync(TimeSpan.FromSeconds(1));
+```
+
+6. **Custom Comparisons**
+```csharp
+public class CustomObject
+{
+    public string Id { get; set; }
+    public DateTime Created { get; set; }
+}
+
+var obj1 = new CustomObject 
+{ 
+    Id = "1", 
+    Created = DateTime.Now 
+};
+var obj2 = new CustomObject 
+{ 
+    Id = "1", 
+    Created = DateTime.Now.AddMilliseconds(100) 
+};
+
+// Compare specific properties
+obj1.Id.Should().Be(obj2.Id);
+
+// Compare with tolerance
+obj1.Created.Should()
+    .BeCloseTo(obj2.Created, TimeSpan.FromSeconds(1));
+```
+
+7. **Collection Ordering**
+```csharp
+var list = new List<CustomObject>
+{
+    new() { Id = "3", Created = DateTime.Now },
+    new() { Id = "1", Created = DateTime.Now.AddDays(-1) },
+    new() { Id = "2", Created = DateTime.Now.AddDays(1) }
+};
+
+// Order by Id
+list.Select(x => x.Id).Should().BeInAscendingOrder();
+
+// Order by Created date
+list.Select(x => x.Created).Should().BeInAscendingOrder();
+
+// Custom ordering
+list.Should().BeInAscendingOrder(x => x.Id);
+```
+
+8. **Exception Details**
+```csharp
+try
+{
+    throw new InvalidOperationException("Outer", 
+        new ArgumentException("Inner", "param"));
+}
+catch (Exception ex)
+{
+    ex.Should().BeOfType<InvalidOperationException>()
+        .Which.Message.Should().Be("Outer");
+    
+    ex.Should().BeOfType<InvalidOperationException>()
+        .Which.InnerException.Should().BeOfType<ArgumentException>()
+        .Which.Message.Should().Be("Inner (Parameter 'param')");
+}
+```
+
+9. **Type Hierarchies**
+```csharp
+// Interface hierarchy
+typeof(IList<int>).Should()
+    .Implement<ICollection<int>>()
+    .And.Implement<IEnumerable<int>>();
+
+// Class hierarchy
+typeof(ArgumentNullException).Should()
+    .BeDerivedFrom<ArgumentException>()
+    .And.BeDerivedFrom<Exception>();
+
+// Generic constraints
+typeof(List<>).Should()
+    .BeAssignableTo(typeof(IList<>));
+```
+
+10. **File System Operations**
+```csharp
+var file = new FileInfo("test.txt");
+File.WriteAllText(file.FullName, "content");
+
+try
+{
+    // Basic checks
+    file.Should().Exist()
+        .And.HaveExtension(".txt")
+        .And.HaveLength(7);
+
+    // File attributes
+    file.Should().BeWritable();
+    file.Should().NotBeReadOnly();
+
+    // Access times
+    file.Should().HaveAccessTimes(
+        creation: DateTime.Today,
+        lastWrite: DateTime.Today,
+        lastAccess: DateTime.Today);
+}
+finally
+{
+    if (file.Exists)
+    {
+        File.Delete(file.FullName);
+    }
+}
+```
+
+11. **Async Event Handling**
+```csharp
+public class AsyncEventSource
+{
+    public event EventHandler Changed;
+    
+    public async Task RaiseEventAsync()
+    {
+        await Task.Delay(100);
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+}
+
+var source = new AsyncEventSource();
+var eventRaised = false;
+source.Changed += (s, e) => eventRaised = true;
+
+await source.RaiseEventAsync();
+eventRaised.Should().BeTrue();
+```
 
 ## Best Practices During Migration
 
