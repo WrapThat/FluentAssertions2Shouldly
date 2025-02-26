@@ -8,11 +8,12 @@
     
     <!-- NuGet package properties -->
     <Version>1.0.0-beta.1</Version>
-    <Authors>Your Name</Authors>
-    <Company>Your Company</Company>
+    <Authors>Terje Sandstrom</Authors>
+    <Company>WrapThat</Company>
+    <Copyright>Copyright © 2025 Terje Sandstrom</Copyright>
     <Description>A library that provides FluentAssertions-style syntax while using Shouldly under the hood, perfect for projects migrating from FluentAssertions to Shouldly.</Description>
-    <PackageProjectUrl>https://github.com/yourusername/FluentAssertions2Shouldly</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/yourusername/FluentAssertions2Shouldly.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/WrapThat/FluentAssertions2Shouldly</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/WrapThat/FluentAssertions2Shouldly.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>testing;assertions;fluent;shouldly;fluentassertions</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

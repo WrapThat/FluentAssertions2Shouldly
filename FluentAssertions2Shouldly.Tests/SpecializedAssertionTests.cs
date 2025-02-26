@@ -186,8 +186,8 @@ namespace FluentAssertions2Shouldly.Tests
 
             // Task with result
             var resultTask = Task.FromResult(42);
-            await resultTask;
-            resultTask.Result.Should().Be(42);
+            var result = await resultTask;
+            result.Should().Be(42);
 
             // Task with exception
             var failingTask = Task.FromException<int>(new InvalidOperationException("error"));
