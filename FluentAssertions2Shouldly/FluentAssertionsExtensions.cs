@@ -183,6 +183,34 @@ public static class EnumExtensions
     }
 }
 
+public static class RecordStructExtensions
+{
+    public static dynamic Should(this object? value)
+    {
+        if (value == null)
+        {
+            var objectAssertionsType = typeof(ObjectAssertions<>).MakeGenericType(typeof(object));
+            return Activator.CreateInstance(objectAssertionsType, value);
+        }
+
+        var type = value.GetType();
+        if (type.IsEnum)
+        {
+            var enumAssertionsType = typeof(EnumAssertions<>).MakeGenericType(type);
+            return Activator.CreateInstance(enumAssertionsType, value);
+        }
+
+        if (!type.IsValueType)
+        {
+            var objectAssertionsType = typeof(ObjectAssertions<>).MakeGenericType(type);
+            return Activator.CreateInstance(objectAssertionsType, value);
+        }
+
+        var recordStructAssertionsType = typeof(RecordStructAssertions<>).MakeGenericType(type);
+        return Activator.CreateInstance(recordStructAssertionsType, value);
+    }
+}
+
 public class AndConstraint<T> where T : class
 {
     private readonly T _value;

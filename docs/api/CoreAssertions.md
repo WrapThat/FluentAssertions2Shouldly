@@ -95,21 +95,24 @@ var list = new[] { 1, 2, 3 };
 
 // Count
 list.Should().HaveCount(3);                   // Exact count
-list.Should().NotBeEmpty();                   // Not empty
-list.Should().ContainSingle();                // Single element
+list.Should().ContainSingle();                // Contains exactly one item
+list.Should().ContainSingle(x => x > 2);      // Contains exactly one item matching predicate
 
 // Content
 list.Should().Contain(2);                     // Contains element
 list.Should().NotContain(4);                  // Doesn't contain
 list.Should().ContainInOrder(1, 2, 3);        // Exact sequence
+list.Should().AllSatisfy(x => x.Should()      // All items satisfy condition
+                              .BeGreaterThan(0));
+
+// IReadOnlyList support
+IReadOnlyList<int> readOnly = list;
+readOnly.Should().HaveCount(3);
+readOnly.Should().ContainSingle(x => x > 2);
 ```
 
 ### Advanced Collection Assertions
 ```csharp
-// Ordering
-list.Should().BeInAscendingOrder();           // Sorted ascending
-list.Should().BeInDescendingOrder();          // Sorted descending
-
 // Multiple Conditions
 list.Should()
     .HaveCount(3)
@@ -119,6 +122,39 @@ list.Should()
 // Predicate Matching
 list.Should().OnlyContain(n => n > 0);        // All match condition
 list.Should().Contain(n => n % 2 == 0);       // Any matches condition
+```
+
+## Object Assertions
+
+### Basic Object Assertions
+```csharp
+var obj = new Person { Name = "John" };
+
+// Type Checking
+obj.Should().BeOfType<Person>();              // Exact type match
+obj.Should().BeAssignableTo<IPerson>();       // Type compatibility
+
+// Reference Equality
+obj.Should().BeSameAs(obj);                   // Same reference
+obj.Should().NotBeSameAs(new Person());       // Different reference
+```
+
+### Advanced Object Assertions
+```csharp
+// Type Conversion
+obj.Should().As<IPerson>()                    // Safe type conversion
+   .Which.Name.Should().Be("John");           // Fluent continuation
+
+// Exception Assertions for Delegates
+Func<void> action = () => throw new Exception();
+action.Should().ThrowExactly<Exception>();    // Exact exception type
+action.Should().NotThrow();                   // No exception thrown
+
+// Fluent Chaining
+obj.Should()
+   .NotBeNull()
+   .Which.Should()
+   .BeOfType<Person>();
 ```
 
 ## Exception Assertions

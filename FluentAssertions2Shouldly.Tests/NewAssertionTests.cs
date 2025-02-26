@@ -137,5 +137,16 @@ namespace FluentAssertions2Shouldly.Tests
             dict.Should().HaveValueForKey("one", 1);
             dict.Should().HaveValueForKey("two", 2);
         }
+
+        [Fact]
+        public void RecordStructAssertions_ShouldWork()
+        {
+            var error = new TestError("test");
+            error.Should().Be(new TestError("test"));
+            error.Should().NotBe(new TestError("different"));
+            error.Should().BeOfType<TestError>();
+        }
+
+        private readonly record struct TestError(string Message);
     }
 } 

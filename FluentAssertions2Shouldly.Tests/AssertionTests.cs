@@ -102,6 +102,24 @@ namespace FluentAssertions2Shouldly.Tests
             // Intersection assertions
             list.Should().IntersectWith(new[] { 2, 3, 4 });
             list.Should().NotIntersectWith(new[] { 4, 5, 6 });
+
+            // New collection assertion tests
+            var singleItemList = new List<int> { 42 };
+            singleItemList.Should().ContainSingle();
+            singleItemList.Should().ContainSingle(x => x == 42);
+
+            var multipleItems = new List<int> { 1, 2, 3 };
+            multipleItems.Should().HaveCount(3);
+            multipleItems.Should().AllSatisfy(x => ((int)x).Should().BeGreaterThan(0));
+
+            // Test with IReadOnlyList
+            IReadOnlyList<int> readOnlyList = new List<int> { 1, 2, 3 };
+            readOnlyList.Should().HaveCount(3);
+            readOnlyList.Should().ContainSingle(x => (int)x == 1);
+
+            // Null tests
+            List<int>? nullList = null;
+            nullList.Should().BeNull();
         }
 
         [Fact]
@@ -282,6 +300,28 @@ namespace FluentAssertions2Shouldly.Tests
             invalid.Should().NotBeDefinedEnum();
         }
 
+        [Fact]
+        public void ObjectAssertions_AllMethods()
+        {
+            // Test Which property
+            var obj = new { Value = 42 };
+            obj.Should().NotBeNull().Which.Should().BeAssignableTo<object>();
+
+            // Test As method
+            var baseClass = new DerivedClass();
+            baseClass.Should().As<BaseClass>().NotBeNull();
+
+            // Test delegate assertions
+            Func<int> throwingFunc = () => throw new InvalidOperationException();
+            Func<int> nonThrowingFunc = () => 42;
+
+            var throwingAssertion = new ObjectAssertions<Func<int>>(throwingFunc);
+            throwingAssertion.ThrowExactly<InvalidOperationException>();
+
+            var nonThrowingAssertion = new ObjectAssertions<Func<int>>(nonThrowingFunc);
+            nonThrowingAssertion.NotThrow();
+        }
+
         private class TestPerson : INotifyPropertyChanged
         {
             private string _name = string.Empty;
@@ -292,10 +332,16 @@ namespace FluentAssertions2Shouldly.Tests
                 get => _name;
                 set
                 {
-                    _name = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+                    if (_name != value)
+                    {
+                        _name = value;
+                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+                    }
                 }
             }
         }
+
+        private class BaseClass { }
+        private class DerivedClass : BaseClass { }
     }
 } 

@@ -12,20 +12,20 @@ namespace FluentAssertions2Shouldly.Tests
         [Fact]
         public void NullValues_ShouldWork()
         {
-            // String
-            string nullString = null;
+            // String assertions
+            string? nullString = null;
             nullString.Should().BeNull();
-            
-            // Object
-            object nullObject = null;
-            nullObject.Should().BeNull();
-            
-            // Collections
-            List<int> nullList = null;
+
+            // Object assertions
+            object? nullObject = null;
+            ((object?)nullObject).Should().BeNull();
+
+            // Collection assertions
+            List<int>? nullList = null;
             nullList.Should().BeNull();
-            
-            // Arrays
-            int[] nullArray = null;
+
+            // Array assertions
+            int[]? nullArray = null;
             nullArray.Should().BeNull();
         }
 
@@ -167,7 +167,7 @@ namespace FluentAssertions2Shouldly.Tests
         private class Node
         {
             public int Value { get; set; }
-            public Node Next { get; set; }
+            public Node? Next { get; set; }
         }
 
         [Flags]
