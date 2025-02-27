@@ -121,17 +121,12 @@ namespace FluentAssertions2Shouldly
                 {
                     action(item);
                 }
-                return this;
             }
-            if (Subject is System.Collections.IEnumerable nonGenericEnumerable)
+            else
             {
-                foreach (var item in nonGenericEnumerable)
-                {
-                    action(item);
-                }
-                return this;
+                throw new ShouldAssertException($"Expected {typeof(T).Name} to be enumerable");
             }
-            throw new ShouldAssertException($"Cannot verify all items on type {typeof(T).Name} as it does not implement IEnumerable");
+            return this;
         }
 
         // Function assertions
@@ -180,9 +175,11 @@ namespace FluentAssertions2Shouldly
         // Type conversion
         public ObjectAssertions<TExpected> As<TExpected>() where TExpected : class
         {
-            var converted = Subject as TExpected;
-            converted.ShouldNotBeNull();
-            return new ObjectAssertions<TExpected>(converted);
+            if (Subject is TExpected expected)
+            {
+                return new ObjectAssertions<TExpected>(expected);
+            }
+            throw new ShouldAssertException($"Expected {typeof(T).Name} to be of type {typeof(TExpected).Name}");
         }
 
         public ObjectAssertions<T> Which => this;
@@ -250,8 +247,7 @@ namespace FluentAssertions2Shouldly
 
         public ObjectAssertions<T> NotBeAssignableTo(Type expected)
         {
-            Subject.GetType().IsAssignableTo(expected)
-                .ShouldBeFalse();
+            Subject.ShouldNotBeAssignableTo(expected);
             return this;
         }
 
@@ -273,6 +269,17 @@ namespace FluentAssertions2Shouldly
             value.ShouldNotBeNull();
             predicate(value).ShouldBeTrue();
             return this;
+        }
+
+        public ObjectAssertions<T> Invoking(Action<T> action)
+        {
+            action(Subject);
+            return this;
+        }
+
+        public void Invoke()
+        {
+            // This method is intentionally empty as it's just a terminator for the fluent chain
         }
     }
 } 

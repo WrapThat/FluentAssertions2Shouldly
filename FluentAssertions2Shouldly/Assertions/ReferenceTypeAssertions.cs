@@ -16,6 +16,13 @@ namespace FluentAssertions2Shouldly
             Subject = instance;
         }
 
+        public AndConstraint<TAssertions> Because(string because, params object[] becauseArgs)
+        {
+            // In Shouldly, we don't have direct support for because messages
+            // but we can store it for potential use in failure messages
+            return new AndConstraint<TAssertions>((TAssertions)this);
+        }
+
         public AndConstraint<TAssertions> Be(TSubject expected)
         {
             Subject.ShouldBe(expected);

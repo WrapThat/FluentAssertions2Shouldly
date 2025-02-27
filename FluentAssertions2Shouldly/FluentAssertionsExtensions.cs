@@ -76,6 +76,11 @@ public static class ActionExtensions
     {
         return new ActionAssertions(action).NotThrow();
     }
+
+    public static ObjectAssertions<T> ThrowExactly<TException, T>(this ObjectAssertions<T> assertions) where TException : Exception where T : Delegate
+    {
+        return assertions.ThrowExactly<TException>();
+    }
 }
 
 public static class FileExtensions
@@ -117,6 +122,15 @@ public static class ObjectExtensions
     public static ObjectAssertions<T> Should<T>(this T value) where T : class
     {
         return new ObjectAssertions<T>(value);
+    }
+
+    public static ObjectAssertions<TExpected> As<TExpected>(this object value) where TExpected : class
+    {
+        if (value is TExpected expected)
+        {
+            return new ObjectAssertions<TExpected>(expected);
+        }
+        throw new ShouldAssertException($"Expected {value.GetType().Name} to be of type {typeof(TExpected).Name}");
     }
 }
 
