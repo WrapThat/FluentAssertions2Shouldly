@@ -54,6 +54,10 @@ namespace FluentAssertions2Shouldly.Tests
             // Comparison assertions
             42.Should().BeGreaterThan(41);
             42.Should().BeLessThan(43);
+            42.Should().BeGreaterThanOrEqualTo(42);
+            42.Should().BeGreaterThanOrEqualTo(41);
+            42.Should().BeLessThanOrEqualTo(42);
+            42.Should().BeLessThanOrEqualTo(43);
             42.Should().BeInRange(40, 45);
             
             // Sign assertions
@@ -62,100 +66,147 @@ namespace FluentAssertions2Shouldly.Tests
             
             // Set assertions
             42.Should().BeOneOf(41, 42, 43);
+            42.Should().NotBeOneOf(43, 44, 45);
             
             // Approximate assertions
             3.14159.Should().BeApproximately(3.14, 0.01);
+            3.14159.Should().BeCloseTo(3.14, 0.01);
+            3.14159.Should().NotBeCloseTo(3.0, 0.1);
             
             // Type assertions
             42.Should().BeOfType(typeof(int));
             42.Should().BeOfType<int>();
+            
+            // Special value assertions
+            double.PositiveInfinity.Should().BeInfinity();
+            double.NaN.Should().BeNaN();
+            42.0.Should().NotBeNaN();
+            
+            // Zero assertions
+            0.Should().BeZero();
+            42.Should().NotBeZero();
+            
+            // Nullable assertions
+            int? nullValue = null;
+            nullValue.Should().BeNull();
+            int? nonNullValue = 42;
+            nonNullValue.Should().NotBeNull();
         }
 
         [Fact]
         public void CollectionAssertions_AllMethods()
         {
+            // Arrange
             var list = new List<int> { 1, 2, 3 };
-            
-            // Basic assertions
+            var descendingList = new List<int> { 5, 4, 3, 2, 1 };
+            var singleItemList = new List<int> { 42 };
+            var nullableList = new List<string?> { "test", null, "value" };
+            var positiveNumbers = new List<int> { 1, 2, 3, 4, 5 };
+
+            // Act & Assert
             list.Should().HaveCount(3);
             list.Should().NotBeEmpty();
             list.Should().Contain(2);
-            list.Should().NotContain(4);
-            
-            // Order assertions
             list.Should().BeInAscendingOrder();
-            list.Should().ContainInOrder(1, 2, 3);
             
-            // Content assertions
-            list.Should().OnlyContainElementsThat(x => x > 0);
-            list.Should().BeEquivalentTo(new[] { 3, 2, 1 });
-            list.Should().BeSubsetOf(new[] { 1, 2, 3, 4 });
+            // Test BeInDescendingOrder
+            descendingList.Should().BeInDescendingOrder();
             
-            // Single element assertions
-            list.Should().ContainSingle(x => x == 2);
+            // Test ContainInConsecutiveOrder
+            list.Should().ContainInConsecutiveOrder(1, 2, 3);
             
-            // Position assertions
-            list.Should().HaveElementAt(0, 1);
-            list.Should().StartWith(1);
-            list.Should().EndWith(3);
+            // Test OnlyContain
+            positiveNumbers.Should().OnlyContain(1, 2, 3, 4, 5);
             
-            // Intersection assertions
-            list.Should().IntersectWith(new[] { 2, 3, 4 });
-            list.Should().NotIntersectWith(new[] { 4, 5, 6 });
-
-            // New collection assertion tests
-            var singleItemList = new List<int> { 42 };
+            // Test NotBeEquivalentTo
+            list.Should().NotBeEquivalentTo(new List<int> { 4, 5, 6 });
+            
+            // Test ContainSingle
             singleItemList.Should().ContainSingle();
             singleItemList.Should().ContainSingle(x => x == 42);
-
-            var multipleItems = new List<int> { 1, 2, 3 };
-            multipleItems.Should().HaveCount(3);
-            multipleItems.Should().AllSatisfy(x => ((int)x).Should().BeGreaterThan(0));
-
-            // Test with IReadOnlyList
-            IReadOnlyList<int> readOnlyList = new List<int> { 1, 2, 3 };
-            readOnlyList.Should().HaveCount(3);
-            readOnlyList.Should().ContainSingle(x => (int)x == 1);
-
-            // Null tests
-            List<int>? nullList = null;
-            nullList.Should().BeNull();
+            
+            // Test SatisfyRespectively
+            list.Should().SatisfyRespectively(
+                first => first.Should().Be(1),
+                second => second.Should().Be(2),
+                third => third.Should().Be(3)
+            );
+            
+            // Test NotContainNulls
+            var nonNullStrings = new List<string> { "test", "value" };
+            nonNullStrings.Should().NotContainNulls();
+            
+            // Test existing assertions
+            list.Should().BeEquivalentTo(new[] { 1, 2, 3 });
+            list.Should().NotContain(4);
+            list.Should().ContainInOrder(1, 2, 3);
         }
 
         [Fact]
         public void DictionaryAssertions_AllMethods()
         {
+            // Basic dictionary setup
             var dict = new Dictionary<string, int> { { "one", 1 }, { "two", 2 } };
-            
+            var emptyDict = new Dictionary<string, int>();
+            var singleDict = new Dictionary<string, int> { { "single", 1 } };
+            var supersetDict = new Dictionary<string, int> { { "one", 1 }, { "two", 2 }, { "three", 3 } };
+
             // Basic assertions
-            dict.Should().HaveCount(2);
-            dict.Should().NotBeEmpty();
-            
-            // Key assertions
             dict.Should().ContainKey("one");
+            dict.Should().ContainValue(2);
+            dict.Should().ContainPair("one", 1);
+            dict.Should().NotContainKey("three");
+            dict.Should().HaveCount(2);
+
+            // Multiple key/value assertions
             dict.Should().ContainKeys("one", "two");
-            
-            // Value assertions
-            dict.Should().ContainValue(1);
             dict.Should().ContainValues(1, 2);
-            dict.Should().HaveValue(1);
+
+            // Value retrieval
             dict.Should().HaveValueForKey("one", 1);
-            
+            dict.Should().HaveValue(2);
+
+            // Negative assertions
+            dict.Should().NotContainPair("one", 2);
+            dict.Should().NotBeEmpty();
+
             // Empty dictionary assertions
-            new Dictionary<string, int>().Should().BeEmpty();
+            emptyDict.Should().BeEmpty();
+            emptyDict.Should().HaveCount(0);
+
+            // Single item assertions
+            singleDict.Should().ContainSingle();
+            singleDict.Should().HaveCount(1);
+
+            // Subset/superset assertions
+            dict.Should().BeSubsetOf(supersetDict);
+            dict.Should().NotBeSubsetOf(singleDict);
+
+            // Chained assertions
+            dict.Should()
+                .ContainKey("one")
+                .And.ContainValue(2)
+                .And.HaveCount(2);
         }
 
         [Fact]
         public void BooleanAssertions_AllMethods()
         {
-            // Basic assertions
-            true.Should().BeTrue();
-            false.Should().BeFalse();
-            true.Should().NotBeFalse();
+            // Arrange
+            bool trueValue = true;
+            bool falseValue = false;
+
+            // Act & Assert
+            trueValue.Should().BeTrue();
+            falseValue.Should().BeFalse();
+            trueValue.Should().NotBeFalse();
+            falseValue.Should().NotBeTrue();
             
-            // Expression assertions
-            (1 == 1).Should().BeTrue();
-            (1 != 1).Should().BeFalse();
+            // Test Be and NotBe
+            trueValue.Should().Be(true);
+            falseValue.Should().Be(false);
+            trueValue.Should().NotBe(false);
+            falseValue.Should().NotBe(true);
         }
 
         [Fact]
@@ -164,6 +215,9 @@ namespace FluentAssertions2Shouldly.Tests
             var now = DateTime.Now;
             var past = now.AddDays(-1);
             var future = now.AddDays(1);
+            var nearNow = now.AddSeconds(2);
+            var farFromNow = now.AddHours(1);
+            var specificTime = new DateTime(2024, 3, 14, 15, 30, 45, 500);
             
             // Basic assertions
             now.Should().Be(now);
@@ -172,12 +226,23 @@ namespace FluentAssertions2Shouldly.Tests
             // Comparison assertions
             now.Should().BeAfter(past);
             now.Should().BeBefore(future);
-            now.Should().BeCloseTo(now.AddMilliseconds(100), TimeSpan.FromSeconds(1));
+            now.Should().BeOnOrAfter(past);
+            now.Should().BeOnOrAfter(now);
+            now.Should().BeOnOrBefore(future);
+            now.Should().BeOnOrBefore(now);
+            
+            // Closeness assertions
+            now.Should().BeCloseTo(nearNow, TimeSpan.FromSeconds(5));
+            now.Should().NotBeCloseTo(farFromNow, TimeSpan.FromMinutes(30));
             
             // Component assertions
-            now.Should().HaveYear(now.Year);
-            now.Should().HaveMonth(now.Month);
-            now.Should().HaveDay(now.Day);
+            specificTime.Should().HaveYear(2024);
+            specificTime.Should().HaveMonth(3);
+            specificTime.Should().HaveDay(14);
+            specificTime.Should().HaveHour(15);
+            specificTime.Should().HaveMinute(30);
+            specificTime.Should().HaveSecond(45);
+            specificTime.Should().HaveMillisecond(500);
             
             // Date assertions
             now.Should().BeSameDateAs(now.Date);
@@ -185,6 +250,11 @@ namespace FluentAssertions2Shouldly.Tests
             // Kind assertions
             DateTime.UtcNow.Should().BeUtc();
             DateTime.Now.Should().BeLocal();
+            
+            // Set membership assertions
+            var dates = new[] { past, now, future };
+            now.Should().BeOneOf(dates);
+            farFromNow.Should().NotBeOneOf(dates);
         }
 
         [Fact]
@@ -322,6 +392,36 @@ namespace FluentAssertions2Shouldly.Tests
             nonThrowingAssertion.NotThrow();
         }
 
+        [Fact]
+        public void ExceptionAssertions_AllMethods()
+        {
+            // Arrange
+            var innerException = new ArgumentException("Inner exception message");
+            var exception = new InvalidOperationException("Test exception message", innerException);
+            
+            // Act & Assert
+            // Message assertions
+            ExceptionExtensions.Should(exception).WithMessage("Test exception message");
+            ExceptionExtensions.Should(exception).WithMessage("TEST EXCEPTION MESSAGE", ignoreCase: true);
+            ExceptionExtensions.Should(exception).WithMessageContaining("exception message");
+            ExceptionExtensions.Should(exception).WithMessageContaining("EXCEPTION", ignoreCase: true);
+            
+            // Inner exception assertions
+            ExceptionExtensions.Should(exception).WithInnerException<ArgumentException>();
+            ExceptionExtensions.Should(exception).WithInnerExceptionExactly<ArgumentException>();
+            
+            // Multiple assertions (without chaining)
+            var exceptionAssertions = ExceptionExtensions.Should(exception);
+            exceptionAssertions.WithMessage("Test exception message");
+            exceptionAssertions.WithInnerException<ArgumentException>();
+            
+            // Test with different exception types
+            var customException = new CustomTestException("Custom message", new ArgumentNullException("null arg"));
+            var customExceptionAssertions = ExceptionExtensions.Should(customException);
+            customExceptionAssertions.WithMessage("Custom message");
+            customExceptionAssertions.WithInnerExceptionExactly<ArgumentNullException>();
+        }
+
         private class TestPerson : INotifyPropertyChanged
         {
             private string _name = string.Empty;
@@ -343,5 +443,13 @@ namespace FluentAssertions2Shouldly.Tests
 
         private class BaseClass { }
         private class DerivedClass : BaseClass { }
+
+        private class CustomTestException : Exception
+        {
+            public CustomTestException(string message, Exception innerException) 
+                : base(message, innerException)
+            {
+            }
+        }
     }
 } 

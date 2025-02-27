@@ -8,7 +8,7 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     
     <!-- NuGet package properties -->
-    <Version>1.0.0-beta.3</Version>
+    <Version>1.0.0-beta.4</Version>
     <Authors>Terje Sandstrom</Authors>
     <Company>WrapThat</Company>
     <Copyright>Copyright © 2025 Terje Sandstrom</Copyright>

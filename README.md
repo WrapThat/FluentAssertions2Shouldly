@@ -1,6 +1,10 @@
 # FluentAssertions2Shouldly
 
 > This library was developed using [Cursor](https://cursor.sh/), an AI-powered code editor.
+>
+> All code, all tests and all documentation was written by the AI, no code was written by me.
+>
+> The AI is not perfect, it is like a very newbie developer. It needed a lot of coaching, and it didn't remember what it was told.  On the bright side, it never complained, but just tried to do what it was told, and I could do other stuff while it was wading through its own errors, trying to fix them.
 
 A library that provides a FluentAssertions-style syntax while using Shouldly under the hood. This is perfect for:
 

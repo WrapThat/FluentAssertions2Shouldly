@@ -21,6 +21,16 @@ namespace FluentAssertions2Shouldly
         // Collection assertions for IReadOnlyList and IEnumerable
         public ObjectAssertions<T> HaveCount(int expected)
         {
+            if (Subject is IReadOnlyCollection<object> readOnlyCollection)
+            {
+                readOnlyCollection.Count.ShouldBe(expected);
+                return this;
+            }
+            if (Subject is IReadOnlyList<object> readOnlyList)
+            {
+                readOnlyList.Count.ShouldBe(expected);
+                return this;
+            }
             if (Subject is IEnumerable enumerable)
             {
                 var count = enumerable.Cast<object>().Count();
@@ -28,7 +38,7 @@ namespace FluentAssertions2Shouldly
                 return this;
             }
 
-            throw new ShouldAssertException($"Expected {typeof(T).Name} to implement IEnumerable");
+            throw new ShouldAssertException($"Expected {typeof(T).Name} to implement IEnumerable or IReadOnlyList");
         }
 
         public ObjectAssertions<T> NotBeEmpty()

@@ -46,9 +46,9 @@ public static class CollectionExtensions
         return new CollectionAssertions<T>(value);
     }
 
-    public static ObjectAssertions<IReadOnlyList<T>> Should<T>(this IReadOnlyList<T> value)
+    public static CollectionAssertions<T> Should<T>(this IReadOnlyList<T> value)
     {
-        return new ObjectAssertions<IReadOnlyList<T>>(value);
+        return new CollectionAssertions<T>(value);
     }
 }
 
@@ -166,9 +166,9 @@ public static class TaskExtensions
         return new TaskAssertions(task);
     }
 
-    public static Task<AsyncActionAssertions> Should(this Func<Task> taskFunc)
+    public static AsyncActionAssertions Should(this Func<Task> taskFunc)
     {
-        return Task.FromResult(new AsyncActionAssertions(taskFunc));
+        return new AsyncActionAssertions(taskFunc);
     }
 
     public static Task<AsyncActionAssertions> Invoking(this Task task, Func<Task, Task> action)

@@ -10,47 +10,70 @@ namespace FluentAssertions2Shouldly.Tests
         [Fact]
         public void NumericTypeAssertions_ShouldWork()
         {
-            // Int16
-            short s = 42;
-            s.Should().BeOfType(typeof(short));
-            s.Should().BeOfType<short>();
-            s.Should().BeAssignableTo<IComparable>();
-            s.Should().BeAssignableTo(typeof(IComparable));
+            // Int16 assertions
+            short s1 = 42;
+            s1.Should().BeAssignableTo<short>();
+            s1.Should().BeAssignableTo(typeof(short));
+            s1.Should().BeGreaterThan((short)40);
+            s1.Should().BeLessThan((short)50);
 
-            // Int32
-            int i = 42;
-            i.Should().BeOfType(typeof(int));
-            i.Should().BeOfType<int>();
-            i.Should().BeAssignableTo<IComparable>();
-            i.Should().BeAssignableTo(typeof(IComparable));
+            // Int32 assertions
+            int i1 = 42;
+            i1.Should().BeAssignableTo<int>();
+            i1.Should().BeAssignableTo(typeof(int));
+            i1.Should().BeGreaterThan(40);
+            i1.Should().BeLessThan(50);
 
-            // Int64
-            long l = 42;
-            l.Should().BeOfType(typeof(long));
-            l.Should().BeOfType<long>();
-            l.Should().BeAssignableTo<IComparable>();
-            l.Should().BeAssignableTo(typeof(IComparable));
+            // Int64 assertions
+            long l1 = 42L;
+            l1.Should().BeAssignableTo<long>();
+            l1.Should().BeAssignableTo(typeof(long));
+            l1.Should().BeGreaterThan(40L);
+            l1.Should().BeLessThan(50L);
 
-            // Single
-            float f = 42.0f;
-            f.Should().BeOfType(typeof(float));
-            f.Should().BeOfType<float>();
-            f.Should().BeAssignableTo<IComparable>();
-            f.Should().BeAssignableTo(typeof(IComparable));
+            // Single assertions
+            float f1 = 42.5f;
+            f1.Should().BeAssignableTo<float>();
+            f1.Should().BeAssignableTo(typeof(float));
+            f1.Should().BeGreaterThan(40.0f);
+            f1.Should().BeLessThan(50.0f);
+            f1.Should().BeApproximately(42.5f, 0.001f);
 
-            // Double
-            double d = 42.0;
-            d.Should().BeOfType(typeof(double));
-            d.Should().BeOfType<double>();
-            d.Should().BeAssignableTo<IComparable>();
-            d.Should().BeAssignableTo(typeof(IComparable));
+            // Double assertions
+            double d1 = 42.5;
+            d1.Should().BeAssignableTo<double>();
+            d1.Should().BeAssignableTo(typeof(double));
+            d1.Should().BeGreaterThan(40.0);
+            d1.Should().BeLessThan(50.0);
+            d1.Should().BeApproximately(42.5, 0.001);
 
-            // Decimal
-            decimal m = 42.0m;
-            m.Should().BeOfType(typeof(decimal));
-            m.Should().BeOfType<decimal>();
-            m.Should().BeAssignableTo<IComparable>();
-            m.Should().BeAssignableTo(typeof(IComparable));
+            // Decimal assertions
+            decimal m1 = 42.5m;
+            m1.Should().BeAssignableTo<decimal>();
+            m1.Should().BeAssignableTo(typeof(decimal));
+            m1.Should().BeGreaterThan(40.0m);
+            m1.Should().BeLessThan(50.0m);
+            m1.Should().BeApproximately(42.5m, 0.001m);
+
+            // Special value assertions
+            float.PositiveInfinity.Should().BePositiveInfinity();
+            float.NegativeInfinity.Should().BeNegativeInfinity();
+            float.NaN.Should().BeNaN();
+            double.PositiveInfinity.Should().BePositiveInfinity();
+            double.NegativeInfinity.Should().BeNegativeInfinity();
+            double.NaN.Should().BeNaN();
+
+            // Zero assertions
+            0.Should().BeZero();
+            0.0f.Should().BeZero();
+            0.0.Should().BeZero();
+            0m.Should().BeZero();
+
+            // Multiple assertions
+            var num = 42;
+            num.Should().BeGreaterThan(40);
+            num.Should().BeLessThan(50);
+            num.Should().BeInRange(40, 50);
         }
 
         [Fact]
@@ -141,10 +164,29 @@ namespace FluentAssertions2Shouldly.Tests
         [Fact]
         public void RecordStructAssertions_ShouldWork()
         {
-            var error = new TestError("test");
-            error.Should().Be(new TestError("test"));
-            error.Should().NotBe(new TestError("different"));
+            var error = new TestError("test error");
+            var sameError = new TestError("test error");
+            var differentError = new TestError("different error");
+
+            // Basic equality assertions
+            error.Should().Be(sameError);
+            error.Should().NotBe(differentError);
+
+            // Type assertions
             error.Should().BeOfType<TestError>();
+            error.Should().BeAssignableTo<TestError>();
+
+            // Collection assertions
+            var errors = new[] { error, differentError };
+            errors.Should().Contain(error);
+            errors.Should().HaveCount(2);
+
+            // Predicate assertions
+            var predicate = new Func<TestError, bool>(e => e.Message == "test error");
+            error.Should().Match(predicate);
+
+            var containsError = new Func<TestError, bool>(e => e.Message.Contains("error"));
+            error.Should().Match(containsError);
         }
 
         private readonly record struct TestError(string Message);

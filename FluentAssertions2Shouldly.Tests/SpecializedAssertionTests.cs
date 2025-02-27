@@ -199,6 +199,37 @@ namespace FluentAssertions2Shouldly.Tests
             var longTask = Task.Delay(5000);
             await Assert.ThrowsAsync<ShouldCompleteInException>(() => longTask.Should().CompleteWithinAsync(TimeSpan.FromMilliseconds(100)));
         }
+
+        [Fact]
+        public async Task AsyncActionAssertions_ShouldWork()
+        {
+            // Basic async action that completes successfully
+            Func<Task> successAction = async () => await Task.Delay(10);
+            await successAction.Should().NotThrowAsync();
+            await successAction.Should().CompleteWithinAsync(TimeSpan.FromSeconds(1));
+
+            // Async action that throws
+            Func<Task> failingAction = () => Task.FromException(new InvalidOperationException("test error"));
+            await failingAction.Should().ThrowAsync<InvalidOperationException>();
+
+            // Async action that times out
+            Func<Task> timeoutAction = async () => await Task.Delay(2000);
+            await Assert.ThrowsAsync<ShouldCompleteInException>(
+                async () => await timeoutAction.Should().CompleteWithinAsync(TimeSpan.FromMilliseconds(100))
+            );
+
+            // Async action that gets cancelled
+            using var cts = new CancellationTokenSource();
+            Func<Task> cancellingAction = async () => {
+                await Task.Delay(1000, cts.Token);
+            };
+            cts.Cancel();
+            await cancellingAction.Should().ThrowAsync<TaskCanceledException>();
+
+            // Chained assertions
+            await (await successAction.Should().NotThrowAsync())
+                .And.CompleteWithinAsync(TimeSpan.FromSeconds(1));
+        }
     }
 
     public class Person : INotifyPropertyChanged
