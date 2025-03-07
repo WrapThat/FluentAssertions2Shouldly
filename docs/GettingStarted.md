@@ -2,6 +2,14 @@
 
 ## Installation
 
+1. Remove FluentAssertions package
+
+```cmd
+for /r %f in (*.csproj) do dotnet remove "%f" package FluentAssertions
+```
+
+If you use other extensions to FluentAssertions, remove them likewise.
+
 1. Install both required packages:
 ```bash
 dotnet add package FluentAssertions2Shouldly
@@ -9,12 +17,20 @@ dotnet add package Shouldly
 ```
 
 2. Add the necessary using statements to your test files:
+
+Replace
+
 ```csharp
 using FluentAssertions;  // Original FluentAssertions syntax
+```
+with
+```csharp
 using FluentAssertions2Shouldly;  // Our conversion layer
 ```
 
 ## Basic Usage
+
+The following should work with no issues.
 
 ### String Assertions
 ```csharp
