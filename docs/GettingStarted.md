@@ -10,13 +10,13 @@ for /r %f in (*.csproj) do dotnet remove "%f" package FluentAssertions
 
 If you use other extensions to FluentAssertions, remove them likewise.
 
-1. Install both required packages:
+2. Install both required packages:
 ```bash
 dotnet add package FluentAssertions2Shouldly
 dotnet add package Shouldly
 ```
 
-2. Add the necessary using statements to your test files:
+3. Add the necessary using statements to your test files:
 
 Replace
 
